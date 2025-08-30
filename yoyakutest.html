@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIO BEAT - 音楽スタジオ予約</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .studio-info {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .studio-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .studio-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .equipment-list {
+            list-style: none;
+        }
+
+        .equipment-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .equipment-list li:before {
+            content: "🎵";
+            margin-right: 10px;
+        }
+
+        .booking-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .calendar {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            background: #764ba2;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .day-header {
+            background: #f8f9fa;
+            padding: 10px 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            border-right: 1px solid #eee;
+        }
+
+        .day-cell {
+            padding: 15px 5px;
+            text-align: center;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-cell:hover {
+            background: #f0f0f0;
+        }
+
+        .day-cell.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .day-cell.unavailable {
+            background: #ffebee;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .time-slots {
+            padding: 20px;
+        }
+
+        .time-slot {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .time-slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .time-slot.booked {
+            background: #ffebee;
+            color: #999;
+            border-color: #ffcdd2;
+            cursor: not-allowed;
+        }
+
+        .booking-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .price-display {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .studio-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 STUDIO BEAT</h1>
+            <p>プロ仕様の音楽スタジオで最高の演奏を</p>
+        </div>
+
+        <div class="studio-info">
+            <h2>🎵 スタジオ情報</h2>
+            <div class="studio-details">
+                <div class="studio-image">
+                    <div>
+                        <div style="font-size: 3em;">🎸</div>
+                        <p>Studio Room A<br>20畳 防音完備</p>
+                    </div>
+                </div>
+                <div>
+                    <h3>設備・機材</h3>
+                    <ul class="equipment-list">
+                        <li>ドラムセット (Pearl Export)</li>
+                        <li>ベースアンプ (Ampeg SVT)</li>
+                        <li>ギターアンプ (Marshall JCM900)</li>
+                        <li>キーボード (Roland RD-2000)</li>
+                        <li>マイク×4 (SHURE SM58)</li>
+                        <li>ミキサー (YAMAHA MG12XU)</li>
+                        <li>モニタースピーカー</li>
+                        <li>エアコン完備</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-section">
+            <h2>📅 予約カレンダー</h2>
+            <div class="calendar-container">
+                <div class="calendar">
+                    <div class="calendar-header">
+                        2025年9月
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="day-header">日</div>
+                        <div class="day-header">月</div>
+                        <div class="day-header">火</div>
+                        <div class="day-header">水</div>
+                        <div class="day-header">木</div>
+                        <div class="day-header">金</div>
+                        <div class="day-header">土</div>
+                        
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-01')">1</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-02')">2</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-03')">3</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-04')">4</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-05')">5</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-06')">6</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-07')">7</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-08')">8</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-09')">9</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-10')">10</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-11')">11</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-12')">12</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-13')">13</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-14')">14</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-15')">15</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-16')">16</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-17')">17</div>
+                        <div class="day-cell unavailable">18</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-19')">19</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-20')">20</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-21')">21</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-22')">22</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-23')">23</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-24')">24</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-25')">25</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-26')">26</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-27')">27</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-28')">28</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-29')">29</div>
+                        <div class="day-cell" onclick="selectDate(this, '2025-09-30')">30</div>
+                    </div>
+                </div>
+
+                <div class="time-slots">
+                    <h3>利用時間を選択</h3>
+                    <p id="selected-date">日付を選択してください</p>
+                    <div id="time-buttons"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-form" id="booking-form" style="display: none;">
+            <h2>📝 予約情報入力</h2>
+            <form onsubmit="submitBooking(event)">
+                <div class="form-group">
+                    <label>お名前 *</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>電話番号 *</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>メールアドレス *</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>バンド名・グループ名</label>
+                    <input type="text" id="band-name">
+                </div>
+                
+                <div class="form-group">
+                    <label>利用人数</label>
+                    <select id="people-count">
+                        <option value="1">1名</option>
+                        <option value="2">2名</option>
+                        <option value="3">3名</option>
+                        <option value="4">4名</option>
+                        <option value="5">5名以上</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>ジャンル</label>
+                    <select id="genre">
+                        <option value="">選択してください</option>
+                        <option value="rock">ロック</option>
+                        <option value="pop">ポップス</option>
+                        <option value="jazz">ジャズ</option>
+                        <option value="metal">メタル</option>
+                        <option value="acoustic">アコースティック</option>
+                        <option value="other">その他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>備考・特別なリクエスト</label>
+                    <textarea id="notes" rows="3" placeholder="機材の追加希望、アレルギー等があればお書きください"></textarea>
+                </div>
+                
+                <div class="price-display">
+                    <div>ご利用料金</div>
+                    <div class="price" id="total-price">¥0</div>
+                </div>
+                
+                <button type="submit" class="btn">予約を確定する</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedDate = null;
+        let selectedTime = null;
+        
+        const timeSlots = {
+            weekday: [
+                { time: '10:00-11:00', price: 2000, available: true },
+                { time: '11:00-12:00', price: 2000, available: true },
+                { time: '12:00-13:00', price: 2000, available: false },
+                { time: '13:00-14:00', price: 2000, available: true },
+                { time: '14:00-15:00', price: 2000, available: true },
+                { time: '15:00-16:00', price: 2000, available: true },
+                { time: '16:00-17:00', price: 2000, available: false },
+                { time: '17:00-18:00', price: 2500, available: true },
+                { time: '18:00-19:00', price: 2500, available: true },
+                { time: '19:00-20:00', price: 2500, available: true },
+                { time: '20:00-21:00', price: 2500, available: true },
+                { time: '21:00-22:00', price: 2500, available: true }
+            ],
+            weekend: [
+                { time: '10:00-11:00', price: 2500, available: true },
+                { time: '11:00-12:00', price: 2500, available: true },
+                { time: '12:00-13:00', price: 2500, available: false },
+                { time: '13:00-14:00', price: 2500, available: true },
+                { time: '14:00-15:00', price: 2500, available: true },
+                { time: '15:00-16:00', price: 2500, available: false },
+                { time: '16:00-17:00', price: 3000, available: true },
+                { time: '17:00-18:00', price: 3000, available: true },
+                { time: '18:00-19:00', price: 3000, available: true },
+                { time: '19:00-20:00', price: 3000, available: true },
+                { time: '20:00-21:00', price: 3000, available: true },
+                { time: '21:00-22:00', price: 3000, available: true }
+            ]
+        };
+
+        function selectDate(element, date) {
+            // 選択中の日付をリセット
+            document.querySelectorAll('.day-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // 新しい日付を選択
+            element.classList.add('selected');
+            selectedDate = date;
+            
+            // 時間スロットを表示
+            displayTimeSlots(date);
+            
+            document.getElementById('selected-date').textContent = `選択日: ${date}`;
+        }
+
+        function displayTimeSlots(date) {
+            const dateObj = new Date(date);
+            const dayOfWeek = dateObj.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            const slots = isWeekend ? timeSlots.weekend : timeSlots.weekday;
+            const timeButtonsContainer = document.getElementById('time-buttons');
+            
+            timeButtonsContainer.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'time-slot';
+                button.textContent = `${slot.time} - ¥${slot.price.toLocaleString()}`;
+                
+                if (!slot.available) {
+                    button.classList.add('booked');
+                    button.textContent += ' (予約済み)';
+                    button.disabled = true;
+                } else {
+                    button.onclick = () => selectTime(button, slot);
+                }
+                
+                timeButtonsContainer.appendChild(button);
+            });
+        }
+
+        function selectTime(element, slot) {
+            // 選択中の時間をリセット
+            document.querySelectorAll('.time-slot.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 新しい時間を選択
+            element.classList.add('selected');
+            selectedTime = slot;
+            
+            // 予約フォームを表示
+            document.getElementById('booking-form').style.display = 'block';
+            document.getElementById('total-price').textContent = `¥${slot.price.toLocaleString()}`;
+            
+            // スムーズスクロール
+            document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function submitBooking(event) {
+            event.preventDefault();
+            
+            if (!selectedDate || !selectedTime) {
+                alert('日付と時間を選択してください。');
+                return;
+            }
+            
+            const formData = {
+                date: selectedDate,
+                time: selectedTime.time,
+                price: selectedTime.price,
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                bandName: document.getElementById('band-name').value,
+                peopleCount: document.getElementById('people-count').value,
+                genre: document.getElementById('genre').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            // 実際のアプリケーションではここでサーバーに送信
+            console.log('予約データ:', formData);
+            
+            alert(`予約を受け付けました！
+            
+日時: ${formData.date} ${formData.time}
+お名前: ${formData.name}
+料金: ¥${formData.price.toLocaleString()}
+
+確認メールを${formData.email}にお送りします。`);
+            
+            // フォームをリセット
+            document.querySelector('form').reset();
+            document.getElementById('booking-form').style.display = 'none';
+            selectedDate = null;
+            selectedTime = null;
+            
+            // 選択状態をクリア
+            document.querySelectorAll('.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+        }
+    </script>
+</body>
+</html>
